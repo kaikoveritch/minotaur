@@ -28,20 +28,6 @@ struct Position : Equatable, CustomStringConvertible {
 
 }
 
-struct Path : Equatable {
-    let start : Term
-    let end : Term
-
-   //  var description: String {
-   //      return "\(self.x):\(self.y)"
-   //  }
-
-    static func ==(lhs: Path, rhs: Path) -> Bool {
-      return (lhs.start as! Position) == (rhs.start as! Position) && (lhs.end as! Position) == (rhs.end as! Position)
-    }
-
-}
-
 
 // rooms are numbered:
 // x:1,y:1 ... x:n,y:1
