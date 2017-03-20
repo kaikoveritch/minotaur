@@ -37,10 +37,6 @@ func room (_ x: Int, _ y: Int) -> Term {
   return Value (Position (x: x, y: y))
 }
 
-func newPath(_ start: Term, _ end: Term) -> Term {
-   return Value(Path(start: start, end: end))
-}
-
 func doors (from: Term, to: Term) -> Goal {
     return  (from === room(1,2) && to === room(1,1)) ||
             (from === room(1,2) && to === room(2,2)) ||
@@ -89,17 +85,18 @@ func path (from: Term, to: Term, through: Term) -> Goal {
     return  path_rec(from: from, to: to, through: through, subs: subs)
 }
 
-// func battery (through: Term, level: Term) -> Goal {
-//     return  (level === succ(succ(zero)) && doors(from: (through as! Path).start, to: (through as! Path).end)) ||
-//             (
-//                fresh{x in fresh{y in
-//                   (succ(x) === level) && doors(from: (through as! Path).start, to: y) &&
-//                   battery(through: newPath(y, (through as! Path).end), level: x)
-//                }}
-//             )
-// }
-//
-// func winning (through: Term, level: Term) -> Goal {
-//     return  entrance(location: (through as! Path).start) && exit(location: (through as! Path).end) &&
-//             battery(through: through, level: level)
-// }
+func battery (through: Term, level: Term) -> Goal {
+    return  fresh{x in fresh{y in fresh{L in
+      (List.cons(x, List.cons(y, L)) === through) &&
+      (
+         fresh{p in
+            ((L === List.empty) && (succ(succ(p)) === level)) ||
+            ((succ(p) === level) && battery(through: List.cons(y, L), level: p))
+         }
+      )
+   }}}
+}
+
+func winning (through: Term, level: Term) -> Goal {
+    return  
+}
