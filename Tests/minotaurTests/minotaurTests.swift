@@ -70,11 +70,19 @@ class minotaurTests: XCTestCase {
         XCTAssertEqual(resultsOf (goal: goal, variables: [through]).count, 1, "number of paths is incorrect")
     }
 
-    func testLosing() {
-        let through = Variable (named: "through")
-        let goal    = winning (through: through, level: toNat (6))
-        XCTAssertEqual(resultsOf (goal: goal, variables: [through]).count, 0, "number of paths is incorrect")
-    }
+   //  func testLosing() {
+   //      let through = Variable (named: "through")
+   //      let goal    = winning (through: through, level: toNat (6))
+   //      XCTAssertEqual(resultsOf (goal: goal, variables: [through]).count, 0, "number of paths is incorrect")
+   //  }
+
+   func whatHappens() {
+      let through = Variable (named: "through")
+      let goal    = winning (through: through, level: toNat (7))
+      for sol in solve(goal) {
+         print("* \(sol[through])")
+      }
+   }
 
     func testWinning() {
         let through = Variable (named: "through")
@@ -91,7 +99,8 @@ class minotaurTests: XCTestCase {
             ("testMinotaur", testMinotaur),
             ("testPath", testPath),
             ("testBattery", testBattery),
-            ("testLosing", testLosing),
+            // ("testLosing", testLosing),
+            ("whatHappens", whatHappens),
             ("testWinning", testWinning),
         ]
     }
