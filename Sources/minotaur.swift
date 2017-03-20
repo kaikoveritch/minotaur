@@ -78,10 +78,10 @@ func minotaur (location: Term) -> Goal {
 func path_rec (from: Term, to: Term, through: Term, subs: Term) -> Goal {
    return   (doors(from: from, to: to) && (List.cons(to, subs) === through)) ||
             (
-               delayed(fresh{x in
+               fresh{x in
                   doors(from: from, to: x) &&
-                  path_rec(from: x, to: to, through: through, subs: List.cons(x, subs))
-               })
+                  delayed(path_rec(from: x, to: to, through: through, subs: List.cons(x, subs)))
+               }
             )
 }
 // Links to rooms with a path (if possible), which is a list of rooms
@@ -92,47 +92,35 @@ func path (from: Term, to: Term, through: Term) -> Goal {
 
 // Links paths and battery levels sufficient to cross them
 func battery (through: Term, level: Term) -> Goal {
-    return  delayed(fresh{x in fresh{y in fresh{L in
+    return  fresh{x in fresh{y in fresh{L in
                (List.cons(x, List.cons(y, L)) === through) &&
                (
                   fresh{p in
                      ((L === List.empty) && (succ(succ(p)) === level)) ||
                      (
                         (succ(p) === level) &&
-                        battery(through: List.cons(y, L), level: p)
+                        delayed(battery(through: List.cons(y, L), level: p))
                      )
                   }
                )
-            }}})
+            }}}
 }
 
 // Verifies wether the path crosses a minotaur or not
 func meetMinotaur (through: Term) -> Goal {
-   return   delayed(fresh{x in fresh{L in
+   return   fresh{x in fresh{L in
                (List.cons(x,L) === through) &&
-               (minotaur(location: x) || meetMinotaur(through: L))
-            }})
-}
-
-// Allows access to a list's most imbricated element
-func extractLast (from: Term ,first: Term) -> Goal {
-   return   delayed(fresh{x in
-               ((from === List.cons(x, List.empty)) && (x === first)) ||
-               fresh{L in
-                  (from === List.cons(x,L)) &&
-                  extractLast(from: L, first: first)
-               }
-            })
+               (minotaur(location: x) || delayed(meetMinotaur(through: L)))
+            }}
 }
 
 // Checks couples of paths and battery levels that result in a victory
 func winning (through: Term, level: Term) -> Goal {
-    return  fresh{en in fresh{ex in fresh{li in
-               extractLast(from: through, first: en) &&
+    return  fresh{en in fresh{ex in
                entrance(location: en) &&
-               (List.cons(ex,li) === through) && exit(location: ex) &&
-               // path(from: en, to: ex, through: through) &&
-               // battery(through: through, level: level) &&
+               exit(location: ex) &&
+               path(from: en, to: ex, through: through) &&
+               battery(through: through, level: level) &&
                meetMinotaur(through: through)
-            }}}
+            }}
 }
