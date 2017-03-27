@@ -87,7 +87,8 @@ class minotaurTests: XCTestCase {
       let goal    = winning (through: through, level: toNat (7))
       print("The solutions for 7 battery power are:")
       for sol in solve(goal) {
-         print("* \(sol[through])")
+         let reified = sol.reified()
+         print("* \(reified[through])")
       }
    }
 
