@@ -8,7 +8,7 @@ func succ (_ of: Term) -> Map {
 
 func toNat (_ n : Int) -> Term {
     var result : Term = zero
-    for _ in 1...n {
+    for _ in 0..<n {
         result = succ (result)
     }
     return result
@@ -64,7 +64,7 @@ func entrance (location: Term) -> Goal {
     return  (location === room(1,4)) || (location === room(4,4))
 }
 
-// Finds rooms who are exits to the labyrinth
+// Finds rooms who are exits of the labyrinth
 func exit (location: Term) -> Goal {
     return  (location === room(1,1)) || (location === room(4,3))
 }
@@ -76,7 +76,11 @@ func minotaur (location: Term) -> Goal {
 
 // Recursive step to help with 'path' function
 func path_rec (from: Term, to: Term, through: Term, subs: Term) -> Goal {
-   return   (doors(from: from, to: to) && (List.cons(to, subs) === through)) ||
+   return   // Either the two rooms tested are directly linked
+            (doors(from: from, to: to) && (List.cons(to, subs) === through))
+            ||
+            // Or we recursively check for every adjacent room to the starting one if there is
+            // a path to the target (while adding the 'from' room to the total path)
             (
                fresh{x in
                   doors(from: from, to: x) &&
@@ -86,17 +90,25 @@ func path_rec (from: Term, to: Term, through: Term, subs: Term) -> Goal {
 }
 // Links to rooms with a path (if possible), which is a list of rooms
 func path (from: Term, to: Term, through: Term) -> Goal {
-   let subs = List.cons(from, List.empty)
-    return  path_rec(from: from, to: to, through: through, subs: subs)
+   let subs = List.cons(from, List.empty) // Initial path to feed to the recursion (only the starting room)
+    return  path_rec(from: from, to: to, through: through, subs: subs) // Call recursion with same parameters
 }
 
-// Links paths and battery levels sufficient to cross them
+// For a couple: path (represented as a list), battery level.
+// Checks if the number of elements contained (rooms) is
+// inferior or equal to the given battery level
 func battery (through: Term, level: Term) -> Goal {
     return  fresh{x in fresh{y in fresh{L in
-               (List.cons(x, List.cons(y, L)) === through) &&
+               // We first 'extract' the two first rooms
+               (List.cons(x, List.cons(y, L)) === through)
+               &&
+               // Then...
                (
                   fresh{p in
-                     ((L === List.empty) && (succ(succ(p)) === level)) ||
+                     // Either they are the last rooms and level-2 is still a natural (is defined)
+                     ((L === List.empty) && (succ(succ(p)) === level))
+                     ||
+                     // Or we continue recursively on the path without the first room and level-1
                      (
                         (succ(p) === level) &&
                         delayed(battery(through: List.cons(y, L), level: p))
@@ -114,7 +126,9 @@ func meetMinotaur (through: Term) -> Goal {
             }}
 }
 
-// Checks couples of paths and battery levels that result in a victory
+// For a couple: path, battery level.
+// Uses the defined goals to verify that it is a valid path, crosses the minotaur,
+// and will end before the battery is out.
 func winning (through: Term, level: Term) -> Goal {
     return  fresh{en in fresh{ex in
                entrance(location: en) &&
