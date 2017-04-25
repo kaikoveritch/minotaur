@@ -5,7 +5,7 @@ Automated Testing:
   * test: `true`
 
 Review:
-  * new tests added: `not enough`
-  * comments: `not enough`
+  * new tests added: `enough`
+  * comments: `enough`
 
-**Grade: 5.5**
+**Grade: 6**
